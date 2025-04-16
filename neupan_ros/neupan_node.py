@@ -1,5 +1,9 @@
 import rclpy
 from rclpy.node import Node
+
+from geometry_msgs.msg import Twist
+from nav_msgs.msg import Path
+
 from neupan import neupan
 
 class NeupanNode(Node):
@@ -32,6 +36,21 @@ class NeupanNode(Node):
         self.dune_checkpoint_ = self.get_parameter('dune_checkpoint').value
         self.refresh_initial_path_ = self.get_parameter('refresh_initial_path').value
         self.flip_angle_ = self.get_parameter('flip_angle').value
+
+        pan = {'dune_checkpoint': self.dune_checkpoint_}
+        self.neupan_planner = neupan.init_from_yaml(
+            self.planner_config_file_, pan=pan
+        )
+
+        # data
+        self.obstacle_points_ = None #(2,n) n number of points
+        self.robot_state = None #(3,1)[x, y, theta]
+        self.stop = False
+
+        #publisher
+        self.vel_pub_ = self.create_publisher(Twist, 'neupan_cmd_vel', 10)
+        self.plan_pub_ = self.create_publisher(Path, 'neupan_plan', 10)
+        
 
         self.timer_ = self.create_timer(0.02, self.run)
     
