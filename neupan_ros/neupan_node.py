@@ -1,8 +1,13 @@
 import rclpy
 from rclpy.node import Node
 
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, PoseStamped
 from nav_msgs.msg import Path
+from visualization_msgs.msg import MarkerArray, Marker
+from sensor_msgs.msg import LaserScan
+
+from tf2_ros.transform_listener import TransformListener
+from tf2_ros.buffer import Buffer
 
 from neupan import neupan
 
@@ -50,11 +55,47 @@ class NeupanNode(Node):
         #publisher
         self.vel_pub_ = self.create_publisher(Twist, 'neupan_cmd_vel', 10)
         self.plan_pub_ = self.create_publisher(Path, 'neupan_plan', 10)
+        self.ref_state_pub_ = self.create_publisher(Path,'neupan_ref_state', 10)
+
+        # for visulaization
+        self.point_markers_pub_dune_ = self.create_publisher(MarkerArray, 'dune_point_markers', 10)
+        self.robot_marker_pub_ = self.create_publisher(Marker, 'robot_marker', 10)
+        self.point_marker_pub__nrmp_ = self.create_publisher(MarkerArray, 'nrmp_point_markers')
+
+        # tf listener
+        self.tf_buffer_ = Buffer()
+        self.tf_listener_ = TransformListener(self.tf_buffer_, self)
+
+        # subscriber
+        self.scan_sub_ = self.create_subscription(LaserScan,
+                                                'scan',
+                                                self.laserCallback,
+                                                10)
         
+        self.init_path_sub_ = self.create_subscription(Path,
+                                                       'initial_path',
+                                                       self.pathCallback,
+                                                       10)
+        
+        self.neupan_goal_sub_ = self.create_subscription(PoseStamped,
+                                                       'neupan_goal',
+                                                       self.goalCallback,
+                                                       10)
+        
+
 
         self.timer_ = self.create_timer(0.02, self.run)
     
     def run(self):
+        pass
+
+    def scanCallback(self, msg):
+        pass
+
+    def pathCallback(self, msg):
+        pass
+
+    def goalCallback(self, msg):
         pass
     
 
